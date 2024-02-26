@@ -35,7 +35,7 @@ class BotTaski(BaseLogic):
         props = board_bot.properties
 
         # Analyze new state
-        if props.diamonds == 4 and self.goal_position is None:
+        if props.diamonds >= 4 and self.goal_position is None:
             # Move to base
             base = board_bot.properties.base
             self.goal_position = base
