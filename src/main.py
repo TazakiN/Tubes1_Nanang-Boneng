@@ -8,13 +8,13 @@ from game.bot_handler import BotHandler
 from game.logic.random import RandomLogic
 from game.util import *
 from game.logic.base import BaseLogic
+from game.logic.taski import BotTaski
+from game.logic.nopal import NopalLogic
 
 init()
 BASE_URL = "http://localhost:3000/api"
 DEFAULT_BOARD_ID = 1
-CONTROLLERS = {
-    "Random": RandomLogic,
-}
+CONTROLLERS = {"Random": RandomLogic, "Taski": BotTaski, "Nopal": NopalLogic}
 
 ###############################################################################
 #
