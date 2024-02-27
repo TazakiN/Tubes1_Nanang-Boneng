@@ -5,7 +5,7 @@ from game.models import GameObject, Board, Position
 from ..util import get_direction, position_equals
 
 
-class BotTaski(BaseLogic):
+class TaskiLogic2(BaseLogic):
     """
     BOT GERIDI By Radius Bot ke Diamond terdekat
     Bakal ngelakuin pencarian diamond dengan radius 1, 2, 3, dst
@@ -14,6 +14,7 @@ class BotTaski(BaseLogic):
     kalo diamondnya udah 4, bakal balik ke base
     defense: ga ada
     attack: ga ada
+    !! udah ada tambahan fungsi untuk ngecek teleporter
     """
 
     def __init__(self):
@@ -21,14 +22,28 @@ class BotTaski(BaseLogic):
         self.goal_position: Optional[Position] = None
         self.current_direction = 0
 
+    def get_teleporter(self, board: Board) -> Optional[Position]:
+        return [t for t in board.game_objects if t.type == "TeleportGameObject"]
+
+    def is_near_teleporter(
+        self, board_bot: GameObject, board: Board
+    ) -> Optional[Position]:
+        current_position = board_bot.position
+        # cek jarak antara bot dengan teleporter
+        for teleporter in self.get_teleporter(board):
+            if (
+                abs(current_position.x - teleporter.position.x) <= 2
+                and abs(current_position.y - teleporter.position.y) <= 2
+            ):
+                return teleporter.position
+        return None
+
     def search_diamond(
         self, board_bot: GameObject, board: Board, search_radius: int
     ) -> Optional[Position]:
         current_position = board_bot.position
         for i in range(-(search_radius), search_radius + 1):
             for j in range(-(search_radius), search_radius + 1):
-                if i == 0 and j == 0:
-                    continue
                 temp_diamond = Position(current_position.x + i, current_position.y + j)
                 for diamond in board.diamonds:
                     if diamond.position == temp_diamond:
@@ -47,11 +62,14 @@ class BotTaski(BaseLogic):
         props = board_bot.properties
 
         # Analyze new state
-        if props.diamonds >= 4 and self.goal_position is None:
+        if props.diamonds >= 4:
             # Move to base
             base = board_bot.properties.base
             self.goal_position = base
             print("RECALL RECALL")
+        # elif self.is_near_teleporter(board_bot, board) is not None:
+        #     teleporter = self.is_near_teleporter(board_bot, board)
+        #     self.goal_position = teleporter
         else:
             rad = 1
             while self.goal_position is None:
@@ -62,6 +80,13 @@ class BotTaski(BaseLogic):
                 else:
                     # increment search radius
                     rad += 1
+
+        if self.is_near_teleporter(board_bot, board) is not None:
+            print(
+                "TELEPORTER FOUND at",
+                self.is_near_teleporter(board_bot, board).x,
+                self.is_near_teleporter(board_bot, board).y,
+            )
 
         current_position = board_bot.position
         if self.goal_position:
