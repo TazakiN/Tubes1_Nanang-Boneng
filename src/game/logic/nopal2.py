@@ -4,20 +4,8 @@ from typing import Optional, Tuple
 from game.logic.base import BaseLogic
 from game.models import GameObject, Board, Position
 from ..util import get_direction
-from time import time
 
 class NopalLogic2(BaseLogic):
-    # def timer(seconds):
-    #     start_time = time()
-    #     while True:
-    #         elapsed_time = time() - start_time
-    #         print(f'Timer: {elapsed_time}')
-    #         if elapsed_time >= seconds:
-    #             break
-    #     return True
-    
-    # timer_to_base = timer(10)
-
     def __init__(self):
         self.timer_to_base = 0
         self.directions = [(1, 0), (0, 1), (-1, 0), (0, -1)]
@@ -25,8 +13,8 @@ class NopalLogic2(BaseLogic):
         self.current_direction = 0
 
 
-    # def distance(self, x2, x1, y2, y1):
-    #     return ((x2 - x1) ** 2 + (y2 - y1) ** 2) ** 0.5
+    def distance(self, x2, x1, y2, y1):
+        return ((x2 - x1) ** 2 + (y2 - y1) ** 2) ** 0.5
 
     
     def next_move(self, board_bot: GameObject, board: Board):
@@ -61,15 +49,23 @@ class NopalLogic2(BaseLogic):
 
             # diamond terdekat dari bot
             print(f'DIAMOND COUNT: {len(board.diamonds)}')
+            # for i in range(1, len(board.diamonds)):
+            #     print(f'ALL DIAMOND: {board.diamonds[i].position}')
+            #     if (board.diamonds[i].position.x - board_bot.position.x) + (board.diamonds[i].position.y - board_bot.position.y) < (diamond_position.x - board_bot.position.x) + (diamond_position.y - board_bot.position.y):
+            #         diamond_position = board.diamonds[i].position
+            #         self.goal_position = diamond_position
+            #         diamond_position_new = diamond_position
+            # print("POSISI diaomon NEW: ")
+            # print(diamond_position_new)
+
             for i in range(1, len(board.diamonds)):
                 print(f'ALL DIAMOND: {board.diamonds[i].position}')
-                if (board.diamonds[i].position.x - board_bot.position.x) + (board.diamonds[i].position.y - board_bot.position.y) < (diamond_position.x - board_bot.position.x) + (diamond_position.y - board_bot.position.y):
+                if self.distance(board.diamonds[i].position.x, board_bot.position.x, board.diamonds[i].position.y, board_bot.position.y) < self.distance(diamond_position.x, board_bot.position.x, diamond_position.y, board_bot.position.y):
                     diamond_position = board.diamonds[i].position
                     self.goal_position = diamond_position
                     diamond_position_new = diamond_position
-            print("POSISI diaomon NEW: ")
-            print(diamond_position_new)
-            
+                    print("POSISI diaomon NEW: ")
+                    print(diamond_position_new)
                 
 
         current_position = board_bot.position
