@@ -6,6 +6,16 @@ from ..util import get_direction, position_equals
 
 
 class BotTaski(BaseLogic):
+    """
+    BOT GERIDI By Radius Bot ke Diamond terdekat
+    Bakal ngelakuin pencarian diamond dengan radius 1, 2, 3, dst
+    kalo ketemu diamond, bakal ngikutin diamond tersebut
+    kalo diamondnya ilang, bakal cari diamond lagi
+    kalo diamondnya udah 4, bakal balik ke base
+    defense: ga ada
+    attack: ga ada
+    """
+
     def __init__(self):
         self.directions = [(1, 0), (0, 1), (-1, 0), (0, -1)]
         self.goal_position: Optional[Position] = None
@@ -17,6 +27,8 @@ class BotTaski(BaseLogic):
         current_position = board_bot.position
         for i in range(-(search_radius), search_radius + 1):
             for j in range(-(search_radius), search_radius + 1):
+                if i == 0 and j == 0:
+                    continue
                 temp_diamond = Position(current_position.x + i, current_position.y + j)
                 for diamond in board.diamonds:
                     if diamond.position == temp_diamond:
@@ -41,7 +53,7 @@ class BotTaski(BaseLogic):
             self.goal_position = base
             print("RECALL RECALL")
         else:
-            rad = 2
+            rad = 1
             while self.goal_position is None:
                 # Just roam around
                 diamond = self.search_diamond(board_bot, board, rad)
