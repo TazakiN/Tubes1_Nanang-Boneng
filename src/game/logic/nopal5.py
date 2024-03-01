@@ -40,18 +40,6 @@ class NopalLogic5(BaseLogic):
         # Cari diamond terdekat dari bot
         print(f'DIAMOND COUNT: {len(board.diamonds)}')
         for i in range(1, len(board.diamonds)):
-            red_diamond = self.red_diamonds(board)
-            red_diamond_count = len(red_diamond)
-            # print(f'ALL DIAMOND: {board.diamonds[i].position}')
-            # print(f'RED DIAMOND: {red_diamond}')
-
-            # j = 0
-            # red_diamond_position = None
-            # if j < red_diamond_count:
-            #     red_diamond_position = red_diamond[j].position
-            #     print(f'RED DIAMOND: {red_diamond[j].position}')
-            #     j += 1
-            
             distance_to_diamond_i = self.distance(board.diamonds[i].position.x, board_bot.position.x, board.diamonds[i].position.y, board_bot.position.y)
             distance_to_diamond = self.distance(diamond_position.x, board_bot.position.x, diamond_position.y, board_bot.position.y)
 
@@ -59,16 +47,6 @@ class NopalLogic5(BaseLogic):
             if board.diamonds[i].properties.points == 2 and board_bot.properties.diamonds == 4:
                 print("DIAMOND 2 TAPI UDAH 4")
                 continue
-
-            # Diamond terdekat dari bot
-            # if red_diamond_position:
-            #     distance_to_red_diamond = self.distance(red_diamond_position.x, board_bot.position.x, red_diamond_position.y, board_bot.position.y)
-            #     print(f'DIST RED: {distance_to_red_diamond}')
-            #     if distance_to_diamond_i <= 1:
-            #         print(f'DISTANCE TO RED DIAMOND: {distance_to_red_diamond}')
-            #         self.goal_position = red_diamond_position
-            #         print("POSISI diaomon RED: ")
-            #         print(red_diamond_position)
 
             elif distance_to_diamond_i < distance_to_diamond:
                 diamond_position = board.diamonds[i].position
@@ -86,7 +64,17 @@ class NopalLogic5(BaseLogic):
         # Monitor jarak bot ke base
         distance_to_base = self.distance(base.x, board_bot.position.x, base.y, board_bot.position.y)
         print(f'BASE DIST: {distance_to_base}')
-        
+
+        # # Red diamond
+        # red_diamond = self.red_diamonds(board)
+        # red_diamond_count = len(red_diamond)
+        # j = 0
+        # red_diamond_position = None
+        # if j < red_diamond_count:
+        #     red_diamond_position = red_diamond[j].position
+        #     print(f'RED DIAMOND: {red_diamond[j].position}')
+        #     j += 1
+
         # Pulang ketika inventory penuh
         if props.diamonds == 5:
             self.goal_position = base # Base(y=10, x=3)
@@ -102,6 +90,15 @@ class NopalLogic5(BaseLogic):
             else:
                 print("BELUM WAKTUNYA BALIK")
                 self.goal_position = self.closest_diamond(board, board_bot)
+
+        # elif red_diamond_position:
+        #     distance_to_red_diamond = self.distance(red_diamond_position.x, board_bot.position.x, red_diamond_position.y, board_bot.position.y)
+        #     print(f'DIST RED: {distance_to_red_diamond}')
+        #     if distance_to_red_diamond <= 4:
+        #         print(f'DISTANCE TO RED DIAMOND: {distance_to_red_diamond}')
+        #         self.goal_position = red_diamond_position
+        #         print("POSISI diaomon RED: ")
+        #         print(red_diamond_position)
 
         else:
             self.goal_position = self.closest_diamond(board, board_bot)
