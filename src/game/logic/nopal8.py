@@ -1,4 +1,5 @@
 import random
+from colorama import Fore, Style
 from typing import Optional, Tuple
 
 from game.logic.base import BaseLogic
@@ -62,18 +63,86 @@ class NopalLogic8(BaseLogic):
         print(f'ENEMY COUNT: {len(board.bots)}')
         for bots in board.bots:
             if bots.id != board_bot.id:
-                bot_enemy_position.append(bots.position)
+                bot_enemy_position.append((bots.position.x, bots.position.y))
         print(f'BOT ENEMY: {bot_enemy_position}')
 
-        if (board_bot.position.x + 1) in bot_enemy_position:
-            pass
+        our_bot = (board_bot.position.x, board_bot.position.y)
+        print(f'OUR BOT: {our_bot}')
+        print((board_bot.position.x+1, board_bot.position.y) )
+        if (board_bot.position.x + 1, board_bot.position.y) in bot_enemy_position:
+            # if board.height
+            print(Fore.RED + Style.BRIGHT +"KANAN ADA MUSUH" + Style.RESET_ALL)
+            # lakukan gerakan yang valid (tidak menabrak batas height dan widht matrix)
+            if board_bot.position.x == 0:
+                if board_bot.position.y == 0:
+                    print(Fore.BLUE +"SUDAH DI POJOK KIRI ATAS, BERGERAK KE BAWAH" + Style.RESET_ALL)
+                    return 0, 1
+                elif board_bot.position.y == board.height-1:
+                    print(Fore.BLUE +"SUDAH DI POJOK KIRI BAWAH, BERGERAK KE ATAS" + Style.RESET_ALL)
+                    return 0, -1
+                else:
+                    print(Fore.BLUE +"BERGERAK KE BAWAH" + Style.RESET_ALL)
+                    return 0, 1
+            else:
+                print(Fore.BLUE +"BERGERAK KE KIRI" + Style.RESET_ALL)
+                return -1, 0
 
+        if (board_bot.position.x - 1, board_bot.position.y) in bot_enemy_position:
+            print(Fore.RED + Style.BRIGHT +"KIRI ADA MUSUH"+ Style.RESET_ALL)
+            if board_bot.position.x == board.width - 1:
+                if board_bot.position.y == 0:
+                    print(Fore.BLUE +"SUDAH DI POJOK KANAN ATAS, BERGERAK KE BAWAH" + Style.RESET_ALL)
+                    return 0, 1
+                elif board_bot.position.y == board.height-1:
+                    print(Fore.BLUE +"SUDAH DI POJOK KANAN BAWAH, BERGERAK KE ATAS" + Style.RESET_ALL)
+                    return 0, -1
+                else:
+                    print(Fore.BLUE +"BERGERAK KE BAWAH" + Style.RESET_ALL)
+                    return 0, 1
+            else:
+                print(Fore.BLUE +"BERGERAK KE KANAN" + Style.RESET_ALL)
+                return 1, 0
+
+        if (board_bot.position.x, board_bot.position.y + 1) in bot_enemy_position:
+            print(Fore.RED + Style.BRIGHT +"ATAS ADA MUSUH"+ Style.RESET_ALL)
+            if board_bot.position.y == board.height - 1:
+                if board_bot.position.x == 0:
+                    print(Fore.BLUE +"SUDAH DI POJOK KIRI BAWAH, BERGERAK KE KANAN" + Style.RESET_ALL)
+                    return 1, 0
+                elif board_bot.position.x == board.width-1:
+                    print(Fore.BLUE +"SUDAH DI POJOK KANAN BAWAH, BERGERAK KE KIRI" + Style.RESET_ALL)
+                    return -1, 0
+                else:
+                    print(Fore.BLUE +"BERGERAK KE KANAN" + Style.RESET_ALL)
+                    return 1, 0
+            else:
+                print(Fore.BLUE +"BERGERAK KE BAWAH" + Style.RESET_ALL)
+                return 0, 1
+
+        if (board_bot.position.x, board_bot.position.y - 1) in bot_enemy_position:
+            print(Fore.RED + Style.BRIGHT +"BAWAH ADA MUSUH"+ Style.RESET_ALL)
+            if board_bot.position.y == 0:
+                if board_bot.position.x == 0:
+                    print(Fore.BLUE +"SUDAH DI POJOK KIRI ATAS, BERGERAK KE KANAN" + Style.RESET_ALL)
+                    return 1, 0
+                elif board_bot.position.x == board.width-1:
+                    print(Fore.BLUE +"SUDAH DI POJOK KANAN ATAS, BERGERAK KE KIRI" + Style.RESET_ALL)
+                    return -1, 0
+                else:
+                    print(Fore.BLUE +"BERGERAK KE KANAN" + Style.RESET_ALL)
+                    return 1, 0
+            else:
+                print(Fore.BLUE +"BERGERAK KE ATAS" + Style.RESET_ALL)
+                return 0, -1
+        return None
+    
     # def tackle(self, board_bot: GameObject, board: Board):
     #     bot_enemy = board.bots.
 
 
     def next_move(self, board_bot: GameObject, board: Board):
-        self.enemy_bot(board, board_bot)
+        if self.enemy_bot(board, board_bot):
+            return self.enemy_bot(board, board_bot)
 
         props = board_bot.properties
         base = board_bot.properties.base
