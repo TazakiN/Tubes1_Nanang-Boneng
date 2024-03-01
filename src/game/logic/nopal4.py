@@ -12,6 +12,7 @@ class NopalLogic4(BaseLogic):
     # timing base: detik 46 kalau masih jauh dari base, suruh pulang, kalau dekat dengan base, suruh pulang di detik 53
     # tackle: NONE
     # defense: NONE
+    # red diamond di radius
 
     def __init__(self):
         self.timer_to_base = 0
@@ -68,12 +69,12 @@ class NopalLogic4(BaseLogic):
                 # print(f'ALL DIAMOND: {board.diamonds[i].position}')
                 # print(f'RED DIAMOND: {red_diamond}')
 
-                # j = 0
-                # red_diamond_position = None
-                # if j < red_diamond_count:
-                #     red_diamond_position = red_diamond[j].position
-                #     print(f'RED DIAMOND: {red_diamond[j].position}')
-                #     j += 1
+                j = 0
+                red_diamond_position = None
+                if j < red_diamond_count:
+                    red_diamond_position = red_diamond[j].position
+                    print(f'RED DIAMOND: {red_diamond[j].position}')
+                    j += 1
                 
                 distance_to_diamond_i = self.distance(board.diamonds[i].position.x, board_bot.position.x, board.diamonds[i].position.y, board_bot.position.y)
                 distance_to_diamond = self.distance(diamond_position.x, board_bot.position.x, diamond_position.y, board_bot.position.y)
@@ -84,14 +85,14 @@ class NopalLogic4(BaseLogic):
                     continue
 
                 # Diamond terdekat dari bot
-                # if red_diamond_position:
-                #     distance_to_red_diamond = self.distance(red_diamond_position.x, board_bot.position.x, red_diamond_position.y, board_bot.position.y)
-                #     print(f'DIST RED: {distance_to_red_diamond}')
-                #     if distance_to_diamond_i <= 1:
-                #         print(f'DISTANCE TO RED DIAMOND: {distance_to_red_diamond}')
-                #         self.goal_position = red_diamond_position
-                #         print("POSISI diaomon RED: ")
-                #         print(red_diamond_position)
+                if red_diamond_position:
+                    distance_to_red_diamond = self.distance(red_diamond_position.x, board_bot.position.x, red_diamond_position.y, board_bot.position.y)
+                    print(f'DIST RED: {distance_to_red_diamond}')
+                    if distance_to_red_diamond <= 1:
+                        print(f'DISTANCE TO RED DIAMOND: {distance_to_red_diamond}')
+                        self.goal_position = red_diamond_position
+                        print("POSISI diaomon RED: ")
+                        print(red_diamond_position)
 
                 elif distance_to_diamond_i < distance_to_diamond:
                     diamond_position = board.diamonds[i].position
