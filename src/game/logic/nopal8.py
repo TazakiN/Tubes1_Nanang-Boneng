@@ -5,14 +5,15 @@ from game.logic.base import BaseLogic
 from game.models import GameObject, Board, Position
 from ..util import get_direction
 
-class NopalLogic4(BaseLogic):
+class NopalLogic8(BaseLogic):
     # GREEDY BY DIAMOND
     # akurat cari diamond terdekat
     # kalau inventori udah 4, ketemu diamond point 2 (4 + 2 != 5), maka skip diamond tersebut (cegah error)
     # timing base: detik 46 kalau masih jauh dari base, suruh pulang, kalau dekat dengan base, suruh pulang di detik 53
     # tackle: NONE
     # defense: NONE
-    # red diamond di radius
+    # modularisasi diamond terdekat
+    # tackle/defense
 
     def __init__(self):
         self.timer_to_base = 0
@@ -31,14 +32,56 @@ class NopalLogic4(BaseLogic):
         return [d for d in board.game_objects if d.properties.points == 2]
 
     
+    def closest_diamond(self, board: Board, board_bot: GameObject):
+        diamond_position = board.diamonds[0].position
+        self.goal_position = diamond_position
+        print(f"POSISI diaomon: {diamond_position}")
+
+        # Cari diamond terdekat dari bot
+        print(f'DIAMOND COUNT: {len(board.diamonds)}')
+        for i in range(1, len(board.diamonds)):
+            distance_to_diamond_i = self.distance(board.diamonds[i].position.x, board_bot.position.x, board.diamonds[i].position.y, board_bot.position.y)
+            distance_to_diamond = self.distance(diamond_position.x, board_bot.position.x, diamond_position.y, board_bot.position.y)
+
+            # Cegah error inventory penuh
+            if board.diamonds[i].properties.points == 2 and board_bot.properties.diamonds == 4:
+                print("DIAMOND 2 TAPI UDAH 4")
+                continue
+
+            elif distance_to_diamond_i < distance_to_diamond:
+                diamond_position = board.diamonds[i].position
+                self.goal_position = diamond_position
+                diamond_position_new = diamond_position
+                print(f"POSISI diaomon NEW: {diamond_position_new} ")
+        
+        return self.goal_position
+
+    def enemy_bot(self, board: Board,  board_bot: GameObject):
+        bot_enemy_position = []
+        print(f'BOT Sendiri: {board_bot}')
+        print(f'ENEMY COUNT: {len(board.bots)}')
+        for bots in board.bots:
+            if bots.id != board_bot.id:
+                bot_enemy_position.append(bots.position)
+        print(f'BOT ENEMY: {bot_enemy_position}')
+
+        if (board_bot.position.x + 1) in bot_enemy_position:
+            pass
+
+    # def tackle(self, board_bot: GameObject, board: Board):
+    #     bot_enemy = board.bots.
+
+
     def next_move(self, board_bot: GameObject, board: Board):
+        self.enemy_bot(board, board_bot)
+
         props = board_bot.properties
         base = board_bot.properties.base
 
         # Monitor jarak bot ke base
         distance_to_base = self.distance(base.x, board_bot.position.x, base.y, board_bot.position.y)
         print(f'BASE DIST: {distance_to_base}')
-        
+
         # Pulang ketika inventory penuh
         if props.diamonds == 5:
             self.goal_position = base # Base(y=10, x=3)
@@ -53,54 +96,12 @@ class NopalLogic4(BaseLogic):
                 self.goal_position = base
             else:
                 print("BELUM WAKTUNYA BALIK")
+                self.goal_position = self.closest_diamond(board, board_bot)
 
         else:
-            # Inisiasi posisi diamond pertama
-            diamond_position = board.diamonds[0].position
-            self.goal_position = diamond_position
-            print("POSISI diaomon: ")
-            print(diamond_position)
-
-            # Cari diamond terdekat dari bot
-            print(f'DIAMOND COUNT: {len(board.diamonds)}')
-            for i in range(1, len(board.diamonds)):
-                red_diamond = self.red_diamonds(board)
-                red_diamond_count = len(red_diamond)
-                # print(f'ALL DIAMOND: {board.diamonds[i].position}')
-                # print(f'RED DIAMOND: {red_diamond}')
-
-                j = 0
-                red_diamond_position = None
-                if j < red_diamond_count:
-                    red_diamond_position = red_diamond[j].position
-                    print(f'RED DIAMOND: {red_diamond[j].position}')
-                    j += 1
-                
-                distance_to_diamond_i = self.distance(board.diamonds[i].position.x, board_bot.position.x, board.diamonds[i].position.y, board_bot.position.y)
-                distance_to_diamond = self.distance(diamond_position.x, board_bot.position.x, diamond_position.y, board_bot.position.y)
-
-                # Cegah error inventory penuh
-                if board.diamonds[i].properties.points == 2 and props.diamonds == 4:
-                    print("DIAMOND 2 TAPI UDAH 4")
-                    continue
-
-                # Diamond terdekat dari bot
-                if red_diamond_position:
-                    distance_to_red_diamond = self.distance(red_diamond_position.x, board_bot.position.x, red_diamond_position.y, board_bot.position.y)
-                    print(f'DIST RED: {distance_to_red_diamond}')
-                    if distance_to_red_diamond <= 1:
-                        print(f'DISTANCE TO RED DIAMOND: {distance_to_red_diamond}')
-                        self.goal_position = red_diamond_position
-                        print("POSISI diaomon RED: ")
-                        print(red_diamond_position)
-
-                elif distance_to_diamond_i < distance_to_diamond:
-                    diamond_position = board.diamonds[i].position
-                    self.goal_position = diamond_position
-                    diamond_position_new = diamond_position
-                    print("POSISI diaomon NEW: ")
-                    print(diamond_position_new)
-                
+            self.goal_position = self.closest_diamond(board, board_bot)
+        
+        print(f"POSISI BOT: {board_bot.position}")
         print(f"TARGET: {self.goal_position}")
 
         current_position = board_bot.position

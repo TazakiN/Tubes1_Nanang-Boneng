@@ -5,7 +5,7 @@ from game.logic.base import BaseLogic
 from game.models import GameObject, Board, Position
 from ..util import get_direction
 
-class NopalLogic5(BaseLogic):
+class NopalLogic7(BaseLogic):
     # GREEDY BY DIAMOND
     # akurat cari diamond terdekat
     # kalau inventori udah 4, ketemu diamond point 2 (4 + 2 != 5), maka skip diamond tersebut (cegah error)
@@ -13,6 +13,7 @@ class NopalLogic5(BaseLogic):
     # tackle: NONE
     # defense: NONE
     # modularisasi diamond terdekat
+    # gerak y dulu baru x
 
     def __init__(self):
         self.timer_to_base = 0
@@ -20,6 +21,47 @@ class NopalLogic5(BaseLogic):
         self.goal_position: Optional[Position] = None
         self.current_direction = 0
 
+
+    def clamp(self, n, smallest, largest):
+        return max(smallest, min(n, largest))
+
+
+    def get_direction(self, current_x, current_y, dest_x, dest_y):
+        delta_x = self.clamp(dest_x - current_x, -1, 1)
+        delta_y = self.clamp(dest_y - current_y, -1, 1)
+        if delta_y != 0:
+            delta_x = 0
+        return (delta_x, delta_y)
+
+
+    # def clamp2(self, n, smallest, largest):
+    #     return max(smallest, min(n, largest))
+    
+
+    # def get_direction2(self, current_x, current_y, dest_x, dest_y, last_move):
+    #     delta_x = self.clamp2(dest_x - current_x, -1, 1)
+    #     delta_y = self.clamp2(dest_y - current_y, -1, 1)
+
+    #     # Determine next move based on the last move
+    #     if last_move == "x":
+    #         if delta_y != 0:
+    #             delta_x = 0
+    #             last_move = "y"
+    #         elif delta_x == 0:
+    #             last_move = None
+    #     elif last_move == "y":
+    #         if delta_x != 0:
+    #             delta_y = 0
+    #             last_move = "x"
+    #         elif delta_y == 0:
+    #             last_move = None
+    #     else:
+    #         if delta_x != 0:
+    #             last_move = "x"
+    #         elif delta_y != 0:
+    #             last_move = "y"
+
+    #     return (delta_x, delta_y)
 
     def distance(self, x2, x1, y2, y1):
         # hitung jarak antara dua titik
@@ -34,8 +76,7 @@ class NopalLogic5(BaseLogic):
     def closest_diamond(self, board: Board, board_bot: GameObject):
         diamond_position = board.diamonds[0].position
         self.goal_position = diamond_position
-        print("POSISI diaomon: ")
-        print(diamond_position)
+        print(f"POSISI diaomon: {diamond_position}")
 
         # Cari diamond terdekat dari bot
         print(f'DIAMOND COUNT: {len(board.diamonds)}')
@@ -52,8 +93,7 @@ class NopalLogic5(BaseLogic):
                 diamond_position = board.diamonds[i].position
                 self.goal_position = diamond_position
                 diamond_position_new = diamond_position
-                print("POSISI diaomon NEW: ")
-                print(diamond_position_new)
+                print(f"POSISI diaomon NEW: {diamond_position_new}")
         
         return self.goal_position
 
@@ -64,16 +104,6 @@ class NopalLogic5(BaseLogic):
         # Monitor jarak bot ke base
         distance_to_base = self.distance(base.x, board_bot.position.x, base.y, board_bot.position.y)
         print(f'BASE DIST: {distance_to_base}')
-
-        # # Red diamond
-        # red_diamond = self.red_diamonds(board)
-        # red_diamond_count = len(red_diamond)
-        # j = 0
-        # red_diamond_position = None
-        # if j < red_diamond_count:
-        #     red_diamond_position = red_diamond[j].position
-        #     print(f'RED DIAMOND: {red_diamond[j].position}')
-        #     j += 1
 
         # Pulang ketika inventory penuh
         if props.diamonds == 5:
@@ -91,39 +121,42 @@ class NopalLogic5(BaseLogic):
                 print("BELUM WAKTUNYA BALIK")
                 self.goal_position = self.closest_diamond(board, board_bot)
 
-        # elif red_diamond_position:
-        #     distance_to_red_diamond = self.distance(red_diamond_position.x, board_bot.position.x, red_diamond_position.y, board_bot.position.y)
-        #     print(f'DIST RED: {distance_to_red_diamond}')
-        #     if distance_to_red_diamond <= 4:
-        #         print(f'DISTANCE TO RED DIAMOND: {distance_to_red_diamond}')
-        #         self.goal_position = red_diamond_position
-        #         print("POSISI diaomon RED: ")
-        #         print(red_diamond_position)
 
         else:
             self.goal_position = self.closest_diamond(board, board_bot)
-                
+        
+        print(f"POSISI BOT: {board_bot.position}")
         print(f"TARGET: {self.goal_position}")
 
         current_position = board_bot.position
         if self.goal_position:
             # We are aiming for a specific position, calculate delta
-            delta_x, delta_y = get_direction(
+            delta_x, delta_y = self.get_direction(
                 current_position.x,
                 current_position.y,
                 self.goal_position.x,
                 self.goal_position.y,
             )
+            print("MASUK SINI") #del
+            # # We are aiming for a specific position, calculate delta
+            # delta_x, delta_y = self.get_direction2(
+            #     current_position.x,
+            #     current_position.y,
+            #     self.goal_position.x,
+            #     self.goal_position.y,
+            #     "x"
+            # )
+            # print("MASUK SINI") #del
 
-            if delta_x == delta_y:
-                print("X SAMA Y SAMA")
-                step = random.randint(-1, 1)
-                delta_x = step
-                if delta_y == delta_x:
-                    if delta_x == 0:
-                        delta_y = 1
-                    else :
-                        delta_y = delta_x*-1
+            # if delta_x == delta_y:
+            #     print("X SAMA Y SAMA")
+            #     step = random.randint(-1, 1)
+            #     delta_x = step
+            #     if delta_y == delta_x:
+            #         if delta_x == 0:
+            #             delta_y = 1
+            #         else :
+            #             delta_y = delta_x*-1
 
         else:
             # Roam around
