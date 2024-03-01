@@ -36,6 +36,27 @@ class BotTaski(BaseLogic):
                         return temp_diamond
         return None
 
+    def search_diamond_greedy(
+        self, board_bot: GameObject, board: Board, search_radius: int
+    ) -> Optional[Position]:
+        current_position = board_bot.position
+        best_diamond_position = None
+        best_distance = float("inf")
+
+        for i in range(-(search_radius), search_radius + 1):
+            for j in range(-(search_radius), search_radius + 1):
+                temp_diamond = Position(current_position.x + i, current_position.y + j)
+                for diamond in board.diamonds:
+                    if diamond.position == temp_diamond:
+                        distance = abs(temp_diamond.x - current_position.x) + abs(
+                            temp_diamond.y - current_position.y
+                        )
+                        if distance < best_distance:
+                            best_distance = distance
+                            best_diamond_position = temp_diamond
+
+        return best_diamond_position
+
     def check_diamond(self, board: Board) -> bool:
         # check if the diamond in goal position is still there
         for diamond in board.diamonds:
@@ -56,7 +77,7 @@ class BotTaski(BaseLogic):
             rad = 1
             while self.goal_position is None:
                 # Just roam around
-                diamond = self.search_diamond(board_bot, board, rad)
+                diamond = self.search_diamond_greedy(board_bot, board, rad)
                 if diamond:
                     self.goal_position = diamond
                 else:
@@ -73,7 +94,7 @@ class BotTaski(BaseLogic):
                 self.goal_position.y,
             )
 
-            if (delta_x == 0 and delta_y == 0) or not self.check_diamond(board):
+            if delta_x == 0 and delta_y == 0:
                 if not self.check_diamond(board):
                     print("DIAMOND HILANG")
                 self.goal_position = None
