@@ -104,22 +104,6 @@ class NopalLogic8(BaseLogic):
                 return 1, 0
 
         if (board_bot.position.x, board_bot.position.y + 1) in bot_enemy_position:
-            print(Fore.RED + Style.BRIGHT +"ATAS ADA MUSUH"+ Style.RESET_ALL)
-            if board_bot.position.y == board.height - 1:
-                if board_bot.position.x == 0:
-                    print(Fore.BLUE +"SUDAH DI POJOK KIRI BAWAH, BERGERAK KE KANAN" + Style.RESET_ALL)
-                    return 1, 0
-                elif board_bot.position.x == board.width-1:
-                    print(Fore.BLUE +"SUDAH DI POJOK KANAN BAWAH, BERGERAK KE KIRI" + Style.RESET_ALL)
-                    return -1, 0
-                else:
-                    print(Fore.BLUE +"BERGERAK KE KANAN" + Style.RESET_ALL)
-                    return 1, 0
-            else:
-                print(Fore.BLUE +"BERGERAK KE BAWAH" + Style.RESET_ALL)
-                return 0, 1
-
-        if (board_bot.position.x, board_bot.position.y - 1) in bot_enemy_position:
             print(Fore.RED + Style.BRIGHT +"BAWAH ADA MUSUH"+ Style.RESET_ALL)
             if board_bot.position.y == 0:
                 if board_bot.position.x == 0:
@@ -134,10 +118,38 @@ class NopalLogic8(BaseLogic):
             else:
                 print(Fore.BLUE +"BERGERAK KE ATAS" + Style.RESET_ALL)
                 return 0, -1
+
+        if (board_bot.position.x, board_bot.position.y - 1) in bot_enemy_position:
+            print(Fore.RED + Style.BRIGHT +"ATAS ADA MUSUH"+ Style.RESET_ALL)
+            if board_bot.position.y == board.height - 1:
+                if board_bot.position.x == 0:
+                    print(Fore.BLUE +"SUDAH DI POJOK KIRI BAWAH, BERGERAK KE KANAN" + Style.RESET_ALL)
+                    return 1, 0
+                elif board_bot.position.x == board.width-1:
+                    print(Fore.BLUE +"SUDAH DI POJOK KANAN BAWAH, BERGERAK KE KIRI" + Style.RESET_ALL)
+                    return -1, 0
+                else:
+                    print(Fore.BLUE +"BERGERAK KE KANAN" + Style.RESET_ALL)
+                    return 1, 0
+            else:
+                print(Fore.BLUE +"BERGERAK KE BAWAH" + Style.RESET_ALL)
+                return 0, 1
         return None
     
     # def tackle(self, board_bot: GameObject, board: Board):
     #     bot_enemy = board.bots.
+
+
+    def clamp(self, n, smallest, largest):
+        return max(smallest, min(n, largest))
+
+
+    def get_direction(self, current_x, current_y, dest_x, dest_y):
+        delta_x = self.clamp(dest_x - current_x, -1, 1)
+        delta_y = self.clamp(dest_y - current_y, -1, 1)
+        if delta_y != 0:
+            delta_x = 0
+        return (delta_x, delta_y)
 
 
     def next_move(self, board_bot: GameObject, board: Board):
@@ -157,15 +169,16 @@ class NopalLogic8(BaseLogic):
             
         # Base timing management
         elif self.timer_to_base >= 46:
+            print(Fore.RED + "waktu pulang" + Style.RESET_ALL)
             if distance_to_base > 5:
-                print("TOO FAR")
+                print(Fore.CYAN + "TOO FAR, PULANG NOW" + Style.RESET_ALL)
                 self.goal_position = base
             elif self.timer_to_base >= 52:
-                print("timer hit")
+                print(Fore.CYAN + "timer hit, PULANG" + Style.RESET_ALL)
                 self.goal_position = base
-            else:
-                print("BELUM WAKTUNYA BALIK")
-                self.goal_position = self.closest_diamond(board, board_bot)
+            # else:
+            #     print("BELUM WAKTUNYA BALIK")
+            #     self.goal_position = self.closest_diamond(board, board_bot)
 
         else:
             self.goal_position = self.closest_diamond(board, board_bot)
@@ -176,7 +189,7 @@ class NopalLogic8(BaseLogic):
         current_position = board_bot.position
         if self.goal_position:
             # We are aiming for a specific position, calculate delta
-            delta_x, delta_y = get_direction(
+            delta_x, delta_y = self.get_direction(
                 current_position.x,
                 current_position.y,
                 self.goal_position.x,
