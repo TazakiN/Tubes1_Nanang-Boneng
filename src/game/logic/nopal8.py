@@ -7,14 +7,13 @@ from game.models import GameObject, Board, Position
 from ..util import get_direction
 
 class NopalLogic8(BaseLogic):
-    # GREEDY BY DIAMOND
+    # GREEDY BY DIAMOND, TACKLE/DEFENSE, TIMING
     # akurat cari diamond terdekat
     # kalau inventori udah 4, ketemu diamond point 2 (4 + 2 != 5), maka skip diamond tersebut (cegah error)
     # timing base: detik 46 kalau masih jauh dari base, suruh pulang, kalau dekat dengan base, suruh pulang di detik 53
-    # tackle: NONE
-    # defense: NONE
     # modularisasi diamond terdekat
-    # tackle/defense
+    # defense: defense_from_enemy
+    # tackle: tackle_enemu
 
     def __init__(self):
         self.timer_to_base = 0
@@ -57,7 +56,7 @@ class NopalLogic8(BaseLogic):
         
         return self.goal_position
 
-    def enemy_bot(self, board: Board,  board_bot: GameObject):
+    def defense_from_enemy(self, board: Board,  board_bot: GameObject):
         bot_enemy_position = []
         print(f'BOT Sendiri: {board_bot}')
         print(f'ENEMY COUNT: {len(board.bots)}')
@@ -136,8 +135,36 @@ class NopalLogic8(BaseLogic):
                 return 0, 1
         return None
     
-    # def tackle(self, board_bot: GameObject, board: Board):
-    #     bot_enemy = board.bots.
+
+    def tackle_enemy(self, board_bot: GameObject, board: Board):
+        bot_enemy_position = []
+        print(f'BOT Sendiri: {board_bot}')
+        print(f'ENEMY COUNT: {len(board.bots)}')
+        for bots in board.bots:
+            if bots.id != board_bot.id:
+                bot_enemy_position.append((bots.position.x, bots.position.y))
+        print(f'BOT ENEMY: {bot_enemy_position}')
+
+        our_bot = (board_bot.position.x, board_bot.position.y)
+        print(f'OUR BOT: {our_bot}')
+        print((board_bot.position.x+1, board_bot.position.y) )
+        if (board_bot.position.x + 1, board_bot.position.y) in bot_enemy_position:
+            # lakukan gerakan yang menabrak lawan (tidak menabrak batas height dan widht matrix)
+            print(Fore.RED + Style.BRIGHT +"KANAN ADA MUSUH" + Style.RESET_ALL)
+            return 1, 0
+
+        if (board_bot.position.x - 1, board_bot.position.y) in bot_enemy_position:
+            print(Fore.RED + Style.BRIGHT +"KIRI ADA MUSUH"+ Style.RESET_ALL)
+            return -1, 0
+
+        if (board_bot.position.x, board_bot.position.y + 1) in bot_enemy_position:
+            print(Fore.RED + Style.BRIGHT +"BAWAH ADA MUSUH"+ Style.RESET_ALL)
+            return 0, 1
+
+        if (board_bot.position.x, board_bot.position.y - 1) in bot_enemy_position:
+            print(Fore.RED + Style.BRIGHT +"ATAS ADA MUSUH"+ Style.RESET_ALL)
+            return 0, -1
+        return None
 
 
     def clamp(self, n, smallest, largest):
@@ -153,8 +180,13 @@ class NopalLogic8(BaseLogic):
 
 
     def next_move(self, board_bot: GameObject, board: Board):
-        if self.enemy_bot(board, board_bot):
-            return self.enemy_bot(board, board_bot)
+        # if self.tackle_enemy(board_bot, board):
+        #     self.timer_to_base += 1
+        #     return self.tackle_enemy(board_bot, board)
+
+        if self.defense_from_enemy(board, board_bot):
+            self.timer_to_base += 1
+            return self.defense_from_enemy(board, board_bot)
 
         props = board_bot.properties
         base = board_bot.properties.base
@@ -173,7 +205,7 @@ class NopalLogic8(BaseLogic):
             if distance_to_base > 5:
                 print(Fore.CYAN + "TOO FAR, PULANG NOW" + Style.RESET_ALL)
                 self.goal_position = base
-            elif self.timer_to_base >= 52:
+            elif self.timer_to_base >= 53:
                 print(Fore.CYAN + "timer hit, PULANG" + Style.RESET_ALL)
                 self.goal_position = base
             # else:
@@ -189,7 +221,7 @@ class NopalLogic8(BaseLogic):
         current_position = board_bot.position
         if self.goal_position:
             # We are aiming for a specific position, calculate delta
-            delta_x, delta_y = self.get_direction(
+            delta_x, delta_y = get_direction(
                 current_position.x,
                 current_position.y,
                 self.goal_position.x,
