@@ -447,7 +447,8 @@ class TeleLogic(BaseLogic):
 
         # print("ALL DIAMONDS: ")
         # print(board.diamonds)
-
+        if self.sequenceMove:
+            delta_x, delta_y = self.sequenceMove.pop(0)
         self.timer_to_base += 1
         print(f"timer: {self.timer_to_base}")
         return delta_x, delta_y
