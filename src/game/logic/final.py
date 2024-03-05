@@ -48,7 +48,7 @@ class NanangBoneng(BaseLogic):
         if board_bot.properties.diamonds == 4: 
             # Kalau inventory sudah terisi 4, maka hanya search diamond biru
             self.goal_position = board_bot.properties.base
-            temp_distance = -1
+            temp_distance = 999
             # Kalau tidak ada diamond biru, defaultnya balik ke base
             for i in range(0, len(board.diamonds)):
                 if board.diamonds[i].properties.points == 1:
@@ -57,7 +57,7 @@ class NanangBoneng(BaseLogic):
                     if distance_to_diamond < temp_distance:
                         self.goal_position = diamond_position
                         temp_distance = distance_to_diamond
-
+    
         else:
             diamond_position = board.diamonds[0].position
             self.goal_position = diamond_position
