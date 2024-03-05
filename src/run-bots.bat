@@ -9,7 +9,6 @@ start cmd /c "python main.py --logic Random --email=test4@email.com --name=stima
 @REM start cmd /c "python main.py --logic Nopal --email=your_email999@example.com --name=nopal --password=your_password --team etimo"
 @REM start cmd /c "python main.py --logic Nopal4 --email=nopal4@example.com --name=nopal4 --password=your_password --team etimo" 
 @REM start cmd /c "python main.py --logic Nopal5 --email=nopal5@example.com --name=nopal5 --password=your_password --team etimo" 
-@REM start cmd /c "python main.py --logic Nopal6 --email=nopal6@example.com --name=nopal6 --password=your_password --team etimo" 
 start cmd /c "python main.py --logic Nopal7 --email=nopal7@example.com --name=nopal7 --password=your_password --team etimo" 
 @REM start cmd /c "python main.py --logic Nopal9 --email=nopalteleport@example.com --name=teleport --password=teleport --team etimo" 
 @REM start cmd /c "python main.py --logic Nopal9 --email=nopal9@example.com --name=nopal9 --password=your_password --team etimo" 

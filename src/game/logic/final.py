@@ -44,32 +44,42 @@ class NanangBoneng(BaseLogic):
         return None
 
     
-    def closest_diamond(self, board: Board, board_bot: GameObject):
-        diamond_position = board.diamonds[0].position
-        self.goal_position = diamond_position
-        print(f"POSISI diaomon: {diamond_position}")
+    def closest_diamond(self, board: Board, board_bot: GameObject):   
+        if board_bot.properties.diamonds == 4: 
+            # Kalau inventory sudah terisi 4, maka hanya search diamond biru
+            self.goal_position = board_bot.properties.base
+            temp_distance = -1
+            # Kalau tidak ada diamond biru, defaultnya balik ke base
+            for i in range(0, len(board.diamonds)):
+                if board.diamonds[i].properties.points == 1:
+                    distance_to_diamond = self.distance(board.diamonds[i].position.x, board_bot.position.x, board.diamonds[i].position.y, board_bot.position.y)
+                    diamond_position = board.diamonds[i].position
+                    if distance_to_diamond < temp_distance:
+                        self.goal_position = diamond_position
+                        temp_distance = distance_to_diamond
 
-        # Cari diamond terdekat dari bot
-        print(f'DIAMOND COUNT: {len(board.diamonds)}')
-        for i in range(1, len(board.diamonds)):
-            distance_to_diamond_i = self.distance(board.diamonds[i].position.x, board_bot.position.x, board.diamonds[i].position.y, board_bot.position.y)
+        else:
+            diamond_position = board.diamonds[0].position
+            self.goal_position = diamond_position
             distance_to_diamond = self.distance(diamond_position.x, board_bot.position.x, diamond_position.y, board_bot.position.y)
+            print(f"POSISI diaomon: {diamond_position}")
 
-            # Cegah error inventory penuh
-            # print(Fore.CYAN + "dmnd point: " + Style.RESET_ALL)
-            # print(board.diamonds[i].properties.points)
-            # print(Fore.CYAN + "     bot pegang diamond: " + Style.RESET_ALL)
-            # print(f'    {board_bot.properties.diamonds}' )
-            if board.diamonds[i].properties.points == 2 and board_bot.properties.diamonds == 4:
-                print(Fore.RED + "DIAMOND 2 TAPI UDAH 4" + Style.RESET_ALL)
-                continue
+            # Cari diamond terdekat dari bot
+            print(f'DIAMOND COUNT: {len(board.diamonds)}')
 
-            elif distance_to_diamond_i < distance_to_diamond:
-                diamond_position = board.diamonds[i].position
-                self.goal_position = diamond_position
-                diamond_position_new = diamond_position
-                print(f"POSISI diaomon NEW: {diamond_position_new} ")
-        
+            for i in range(1, len(board.diamonds)):
+                distance_to_diamond_i = self.distance(board.diamonds[i].position.x, board_bot.position.x, board.diamonds[i].position.y, board_bot.position.y)
+                
+                # Pertukaran hanya terjadi jika 
+                # 1. Ada jarak yang lebih dekat
+                # 2. Jarak sama tapi yg baru lebih besar poin
+                
+                if (distance_to_diamond_i < distance_to_diamond) or (distance_to_diamond_i == distance_to_diamond and board.diamonds[i].properties.points > board.diamonds[i-1].properties.points):
+                    diamond_position = board.diamonds[i].position
+                    self.goal_position = diamond_position
+                    distance_to_diamond = distance_to_diamond_i
+                    print(f"POSISI diaomon NEW: {diamond_position} ")
+
         return self.goal_position
 
     def defense_from_enemy(self, board: Board,  board_bot: GameObject):
