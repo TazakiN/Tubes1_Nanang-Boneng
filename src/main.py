@@ -14,7 +14,6 @@ from game.logic.taski import BotTaski
 from game.logic.nopal3 import NopalLogic3
 from game.logic.nopal4 import NopalLogic4
 from game.logic.nopal5 import NopalLogic5
-from game.logic.nopal6 import NopalLogic6
 from game.logic.nopal7 import NopalLogic7
 from game.logic.nopal8 import NopalLogic8
 from game.logic.nopal9 import NopalLogic9
@@ -30,8 +29,7 @@ CONTROLLERS = {
     "Nopal2": NopalLogic2,
     "Nopal3": NopalLogic3,
     "Nopal4": NopalLogic4,
-    "Nopal5": NopalLogic5,
-    "Nopal6": NopalLogic6,
+    "Nopal5": NopalLogic5, 
     "Nopal7": NopalLogic7,
     "Nopal8": NopalLogic8,
     "Nopal9": NopalLogic9,
