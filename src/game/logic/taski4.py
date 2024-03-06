@@ -8,8 +8,8 @@ from ..util import get_direction, position_equals
 class BotTaski4(BaseLogic):
     """
     BOT GERIDI By
-    ! TEKAN TOMBOL MERAH AWOKOAWKOWAKOWAK
-    defense: ga ada
+    ! TEKAN TOMBOL MERAH kalo jarak ke tombol merah <= 4
+    ? defense: ga ada
     attack: ga ada
     """
 
@@ -50,7 +50,7 @@ class BotTaski4(BaseLogic):
         else:
             while self.goal_position is None:
                 # Just roam around
-                diamond = self.closest_diamond_button(board)
+                diamond = self.dia(board)
                 if diamond:
                     self.goal_position = diamond
 

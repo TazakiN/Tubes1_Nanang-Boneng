@@ -71,6 +71,13 @@ class TeleLogic(BaseLogic):
                 diamond_position_new = diamond_position
                 print(f"POSISI diaomon NEW: {diamond_position_new} ")
 
+            elif distance_to_diamond_i == distance_to_diamond:
+                if board.diamonds[i].properties.points == 2:
+                    diamond_position = board.diamonds[i].position
+                    self.goal_position = diamond_position
+                    diamond_position_new = diamond_position
+                    print(f"POSISI diaomon NEW: {diamond_position_new} ")
+
         return self.goal_position
 
     def avoid_teleport(self, board_bot: GameObject, board: Board):
@@ -330,6 +337,18 @@ class TeleLogic(BaseLogic):
             delta_x = 0
         return (delta_x, delta_y)
 
+    def get_direction_zigzag(self, current_x, current_y, dest_x, dest_y):
+        delta_x = dest_x - current_x
+        delta_y = dest_y - current_y
+        if abs(delta_x) > abs(delta_y):
+            if delta_x > 0:
+                return (1, 0)
+            return (-1, 0)
+        else:
+            if delta_y > 0:
+                return (0, 1)
+            return (0, -1)
+
     def next_move(self, board_bot: GameObject, board: Board):
         # if self.avoid_teleport(board_bot, board):
         #     self.timer_to_base += 1
@@ -382,7 +401,7 @@ class TeleLogic(BaseLogic):
         current_position = board_bot.position
         if self.goal_position:
             # We are aiming for a specific position, calculate delta
-            delta_x, delta_y = get_direction(
+            delta_x, delta_y = self.get_direction_zigzag(
                 current_position.x,
                 current_position.y,
                 self.goal_position.x,
