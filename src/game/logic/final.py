@@ -6,6 +6,7 @@ from game.logic.base import BaseLogic
 from game.models import GameObject, Board, Position
 from ..util import get_direction
 
+
 class NanangBoneng(BaseLogic):
     # GREEDY BY DIAMOND, TACKLE/DEFENSE, TIMING
     # akurat cari diamond terdekat
@@ -22,20 +23,17 @@ class NanangBoneng(BaseLogic):
         self.current_direction = 0
         self.sequenceMove = []
 
-
     def distance(self, x2, x1, y2, y1):
         # hitung jarak antara dua titik
         return ((x2 - x1) ** 2 + (y2 - y1) ** 2) ** 0.5
-    
 
     def red_diamonds(self, board: Board):
         # list diamond merah
         return [d for d in board.game_objects if d.properties.points == 2]
-    
 
     def get_teleporter(self, board: Board):
         return [t for t in board.game_objects if t.type == "TeleportGameObject"]
-    
+
     # Reset button
     def diamond_button_position(self, board: Board):
         for temp in board.game_objects:
@@ -43,38 +41,56 @@ class NanangBoneng(BaseLogic):
                 return temp.position
         return None
 
-    
-    def closest_diamond(self, board: Board, board_bot: GameObject):   
-        if board_bot.properties.diamonds == 4: 
+    def closest_diamond(self, board: Board, board_bot: GameObject):
+        if board_bot.properties.diamonds == 4:
             # Kalau inventory sudah terisi 4, maka hanya search diamond biru
             self.goal_position = board_bot.properties.base
             temp_distance = 999
             # Kalau tidak ada diamond biru, defaultnya balik ke base
             for i in range(0, len(board.diamonds)):
                 if board.diamonds[i].properties.points == 1:
-                    distance_to_diamond = self.distance(board.diamonds[i].position.x, board_bot.position.x, board.diamonds[i].position.y, board_bot.position.y)
+                    distance_to_diamond = self.distance(
+                        board.diamonds[i].position.x,
+                        board_bot.position.x,
+                        board.diamonds[i].position.y,
+                        board_bot.position.y,
+                    )
                     diamond_position = board.diamonds[i].position
                     if distance_to_diamond < temp_distance:
                         self.goal_position = diamond_position
                         temp_distance = distance_to_diamond
-    
+
         else:
             diamond_position = board.diamonds[0].position
             self.goal_position = diamond_position
-            distance_to_diamond = self.distance(diamond_position.x, board_bot.position.x, diamond_position.y, board_bot.position.y)
+            distance_to_diamond = self.distance(
+                diamond_position.x,
+                board_bot.position.x,
+                diamond_position.y,
+                board_bot.position.y,
+            )
             print(f"POSISI diaomon: {diamond_position}")
 
             # Cari diamond terdekat dari bot
-            print(f'DIAMOND COUNT: {len(board.diamonds)}')
+            print(f"DIAMOND COUNT: {len(board.diamonds)}")
 
             for i in range(1, len(board.diamonds)):
-                distance_to_diamond_i = self.distance(board.diamonds[i].position.x, board_bot.position.x, board.diamonds[i].position.y, board_bot.position.y)
-                
-                # Pertukaran hanya terjadi jika 
+                distance_to_diamond_i = self.distance(
+                    board.diamonds[i].position.x,
+                    board_bot.position.x,
+                    board.diamonds[i].position.y,
+                    board_bot.position.y,
+                )
+
+                # Pertukaran hanya terjadi jika
                 # 1. Ada jarak yang lebih dekat
                 # 2. Jarak sama tapi yg baru lebih besar poin
-                
-                if (distance_to_diamond_i < distance_to_diamond) or (distance_to_diamond_i == distance_to_diamond and board.diamonds[i].properties.points > board.diamonds[i-1].properties.points):
+
+                if (distance_to_diamond_i < distance_to_diamond) or (
+                    distance_to_diamond_i == distance_to_diamond
+                    and board.diamonds[i].properties.points
+                    > board.diamonds[i - 1].properties.points
+                ):
                     diamond_position = board.diamonds[i].position
                     self.goal_position = diamond_position
                     distance_to_diamond = distance_to_diamond_i
@@ -82,120 +98,149 @@ class NanangBoneng(BaseLogic):
 
         return self.goal_position
 
-    def defense_from_enemy(self, board: Board,  board_bot: GameObject):
+    def defense_from_enemy(self, board: Board, board_bot: GameObject):
         bot_enemy_position = []
-        print(f'BOT Sendiri: {board_bot}')
-        print(f'ENEMY COUNT: {len(board.bots)}')
+        print(f"BOT Sendiri: {board_bot}")
+        print(f"ENEMY COUNT: {len(board.bots)}")
         for bots in board.bots:
             if bots.id != board_bot.id:
                 bot_enemy_position.append((bots.position.x, bots.position.y))
-        print(f'BOT ENEMY: {bot_enemy_position}')
+        print(f"BOT ENEMY: {bot_enemy_position}")
 
         our_bot = (board_bot.position.x, board_bot.position.y)
-        print(f'OUR BOT: {our_bot}')
-        print((board_bot.position.x+1, board_bot.position.y) )
+        print(f"OUR BOT: {our_bot}")
+        print((board_bot.position.x + 1, board_bot.position.y))
         if (board_bot.position.x + 1, board_bot.position.y) in bot_enemy_position:
             # if board.height
-            print(Fore.RED + Style.BRIGHT +"KANAN ADA MUSUH" + Style.RESET_ALL)
+            print(Fore.RED + Style.BRIGHT + "KANAN ADA MUSUH" + Style.RESET_ALL)
             # lakukan gerakan yang valid (tidak menabrak batas height dan widht matrix)
             if board_bot.position.x == 0:
                 if board_bot.position.y == 0:
-                    print(Fore.BLUE +"SUDAH DI POJOK KIRI ATAS, BERGERAK KE BAWAH" + Style.RESET_ALL)
+                    print(
+                        Fore.BLUE
+                        + "SUDAH DI POJOK KIRI ATAS, BERGERAK KE BAWAH"
+                        + Style.RESET_ALL
+                    )
                     return 0, 1
-                elif board_bot.position.y == board.height-1:
-                    print(Fore.BLUE +"SUDAH DI POJOK KIRI BAWAH, BERGERAK KE ATAS" + Style.RESET_ALL)
+                elif board_bot.position.y == board.height - 1:
+                    print(
+                        Fore.BLUE
+                        + "SUDAH DI POJOK KIRI BAWAH, BERGERAK KE ATAS"
+                        + Style.RESET_ALL
+                    )
                     return 0, -1
                 else:
-                    print(Fore.BLUE +"BERGERAK KE BAWAH" + Style.RESET_ALL)
+                    print(Fore.BLUE + "BERGERAK KE BAWAH" + Style.RESET_ALL)
                     return 0, 1
             else:
-                print(Fore.BLUE +"BERGERAK KE KIRI" + Style.RESET_ALL)
+                print(Fore.BLUE + "BERGERAK KE KIRI" + Style.RESET_ALL)
                 return -1, 0
 
         if (board_bot.position.x - 1, board_bot.position.y) in bot_enemy_position:
-            print(Fore.RED + Style.BRIGHT +"KIRI ADA MUSUH"+ Style.RESET_ALL)
+            print(Fore.RED + Style.BRIGHT + "KIRI ADA MUSUH" + Style.RESET_ALL)
             if board_bot.position.x == board.width - 1:
                 if board_bot.position.y == 0:
-                    print(Fore.BLUE +"SUDAH DI POJOK KANAN ATAS, BERGERAK KE BAWAH" + Style.RESET_ALL)
+                    print(
+                        Fore.BLUE
+                        + "SUDAH DI POJOK KANAN ATAS, BERGERAK KE BAWAH"
+                        + Style.RESET_ALL
+                    )
                     return 0, 1
-                elif board_bot.position.y == board.height-1:
-                    print(Fore.BLUE +"SUDAH DI POJOK KANAN BAWAH, BERGERAK KE ATAS" + Style.RESET_ALL)
+                elif board_bot.position.y == board.height - 1:
+                    print(
+                        Fore.BLUE
+                        + "SUDAH DI POJOK KANAN BAWAH, BERGERAK KE ATAS"
+                        + Style.RESET_ALL
+                    )
                     return 0, -1
                 else:
-                    print(Fore.BLUE +"BERGERAK KE BAWAH" + Style.RESET_ALL)
+                    print(Fore.BLUE + "BERGERAK KE BAWAH" + Style.RESET_ALL)
                     return 0, 1
             else:
-                print(Fore.BLUE +"BERGERAK KE KANAN" + Style.RESET_ALL)
+                print(Fore.BLUE + "BERGERAK KE KANAN" + Style.RESET_ALL)
                 return 1, 0
 
         if (board_bot.position.x, board_bot.position.y + 1) in bot_enemy_position:
-            print(Fore.RED + Style.BRIGHT +"BAWAH ADA MUSUH"+ Style.RESET_ALL)
+            print(Fore.RED + Style.BRIGHT + "BAWAH ADA MUSUH" + Style.RESET_ALL)
             if board_bot.position.y == 0:
                 if board_bot.position.x == 0:
-                    print(Fore.BLUE +"SUDAH DI POJOK KIRI ATAS, BERGERAK KE KANAN" + Style.RESET_ALL)
+                    print(
+                        Fore.BLUE
+                        + "SUDAH DI POJOK KIRI ATAS, BERGERAK KE KANAN"
+                        + Style.RESET_ALL
+                    )
                     return 1, 0
-                elif board_bot.position.x == board.width-1:
-                    print(Fore.BLUE +"SUDAH DI POJOK KANAN ATAS, BERGERAK KE KIRI" + Style.RESET_ALL)
+                elif board_bot.position.x == board.width - 1:
+                    print(
+                        Fore.BLUE
+                        + "SUDAH DI POJOK KANAN ATAS, BERGERAK KE KIRI"
+                        + Style.RESET_ALL
+                    )
                     return -1, 0
                 else:
-                    print(Fore.BLUE +"BERGERAK KE KANAN" + Style.RESET_ALL)
+                    print(Fore.BLUE + "BERGERAK KE KANAN" + Style.RESET_ALL)
                     return 1, 0
             else:
-                print(Fore.BLUE +"BERGERAK KE ATAS" + Style.RESET_ALL)
+                print(Fore.BLUE + "BERGERAK KE ATAS" + Style.RESET_ALL)
                 return 0, -1
 
         if (board_bot.position.x, board_bot.position.y - 1) in bot_enemy_position:
-            print(Fore.RED + Style.BRIGHT +"ATAS ADA MUSUH"+ Style.RESET_ALL)
+            print(Fore.RED + Style.BRIGHT + "ATAS ADA MUSUH" + Style.RESET_ALL)
             if board_bot.position.y == board.height - 1:
                 if board_bot.position.x == 0:
-                    print(Fore.BLUE +"SUDAH DI POJOK KIRI BAWAH, BERGERAK KE KANAN" + Style.RESET_ALL)
+                    print(
+                        Fore.BLUE
+                        + "SUDAH DI POJOK KIRI BAWAH, BERGERAK KE KANAN"
+                        + Style.RESET_ALL
+                    )
                     return 1, 0
-                elif board_bot.position.x == board.width-1:
-                    print(Fore.BLUE +"SUDAH DI POJOK KANAN BAWAH, BERGERAK KE KIRI" + Style.RESET_ALL)
+                elif board_bot.position.x == board.width - 1:
+                    print(
+                        Fore.BLUE
+                        + "SUDAH DI POJOK KANAN BAWAH, BERGERAK KE KIRI"
+                        + Style.RESET_ALL
+                    )
                     return -1, 0
                 else:
-                    print(Fore.BLUE +"BERGERAK KE KANAN" + Style.RESET_ALL)
+                    print(Fore.BLUE + "BERGERAK KE KANAN" + Style.RESET_ALL)
                     return 1, 0
             else:
-                print(Fore.BLUE +"BERGERAK KE BAWAH" + Style.RESET_ALL)
+                print(Fore.BLUE + "BERGERAK KE BAWAH" + Style.RESET_ALL)
                 return 0, 1
         return None
-    
 
     def tackle_enemy(self, board_bot: GameObject, board: Board):
         bot_enemy_position = []
-        print(f'BOT Sendiri: {board_bot}')
-        print(f'ENEMY COUNT: {len(board.bots)}')
+        print(f"BOT Sendiri: {board_bot}")
+        print(f"ENEMY COUNT: {len(board.bots)}")
         for bots in board.bots:
             if bots.id != board_bot.id:
                 bot_enemy_position.append((bots.position.x, bots.position.y))
-        print(f'BOT ENEMY: {bot_enemy_position}')
+        print(f"BOT ENEMY: {bot_enemy_position}")
 
         our_bot = (board_bot.position.x, board_bot.position.y)
-        print(f'OUR BOT: {our_bot}')
-        print((board_bot.position.x+1, board_bot.position.y) )
+        print(f"OUR BOT: {our_bot}")
+        print((board_bot.position.x + 1, board_bot.position.y))
         if (board_bot.position.x + 1, board_bot.position.y) in bot_enemy_position:
             # lakukan gerakan yang menabrak lawan (tidak menabrak batas height dan widht matrix)
-            print(Fore.RED + Style.BRIGHT +"KANAN ADA MUSUH" + Style.RESET_ALL)
+            print(Fore.RED + Style.BRIGHT + "KANAN ADA MUSUH" + Style.RESET_ALL)
             return 1, 0
 
         if (board_bot.position.x - 1, board_bot.position.y) in bot_enemy_position:
-            print(Fore.RED + Style.BRIGHT +"KIRI ADA MUSUH"+ Style.RESET_ALL)
+            print(Fore.RED + Style.BRIGHT + "KIRI ADA MUSUH" + Style.RESET_ALL)
             return -1, 0
 
         if (board_bot.position.x, board_bot.position.y + 1) in bot_enemy_position:
-            print(Fore.RED + Style.BRIGHT +"BAWAH ADA MUSUH"+ Style.RESET_ALL)
+            print(Fore.RED + Style.BRIGHT + "BAWAH ADA MUSUH" + Style.RESET_ALL)
             return 0, 1
 
         if (board_bot.position.x, board_bot.position.y - 1) in bot_enemy_position:
-            print(Fore.RED + Style.BRIGHT +"ATAS ADA MUSUH"+ Style.RESET_ALL)
+            print(Fore.RED + Style.BRIGHT + "ATAS ADA MUSUH" + Style.RESET_ALL)
             return 0, -1
         return None
 
-
     def clamp(self, n, smallest, largest):
         return max(smallest, min(n, largest))
-
 
     def get_direction(self, current_x, current_y, dest_x, dest_y):
         delta_x = self.clamp(dest_x - current_x, -1, 1)
@@ -204,12 +249,22 @@ class NanangBoneng(BaseLogic):
             delta_x = 0
         return (delta_x, delta_y)
 
+    def get_direction_zigzag(self, current_x, current_y, dest_x, dest_y):
+        delta_x = dest_x - current_x
+        delta_y = dest_y - current_y
+        if abs(delta_x) > abs(delta_y):
+            if delta_x > 0:
+                return (1, 0)
+            return (-1, 0)
+        else:
+            if delta_y > 0:
+                return (0, 1)
+            return (0, -1)
 
     def next_move(self, board_bot: GameObject, board: Board):
         # if self.tackle_enemy(board_bot, board):
         #     self.timer_to_base += 1
         #     return self.tackle_enemy(board_bot, board)
-
 
         props = board_bot.properties
         base = board_bot.properties.base
@@ -219,20 +274,22 @@ class NanangBoneng(BaseLogic):
         if self.defense_from_enemy(board, board_bot):
             self.timer_to_base += 1
             return self.defense_from_enemy(board, board_bot)
-        
+
         # Sequence gerakan menghindari teleport
         if self.sequenceMove:
             self.timer_to_base += 1
             return self.sequenceMove.pop(0)
 
         # Monitor jarak bot ke base
-        distance_to_base = self.distance(base.x, board_bot.position.x, base.y, board_bot.position.y)
-        print(f'BASE DIST: {distance_to_base}')
+        distance_to_base = self.distance(
+            base.x, board_bot.position.x, base.y, board_bot.position.y
+        )
+        print(f"BASE DIST: {distance_to_base}")
 
         # Pulang ketika inventory penuh
         if props.diamonds == 5:
-            self.goal_position = base # Base(y=10, x=3)
-            
+            self.goal_position = base  # Base(y=10, x=3)
+
         # Base timing management
         elif self.timer_to_base >= 45:
             print(Fore.RED + "waktu pulang" + Style.RESET_ALL)
@@ -245,21 +302,29 @@ class NanangBoneng(BaseLogic):
             else:
                 print("BELUM WAKTUNYA BALIK")
                 self.goal_position = self.closest_diamond(board, board_bot)
-        
+
         # Injak reset diamond button
-        elif self.distance(current_position.x, self.diamond_button_position(board).x, current_position.y, self.diamond_button_position(board).y) <= 3:
+        elif (
+            self.distance(
+                current_position.x,
+                self.diamond_button_position(board).x,
+                current_position.y,
+                self.diamond_button_position(board).y,
+            )
+            <= 3
+        ):
             diamond_button = self.diamond_button_position(board)
             self.goal_position = diamond_button
 
         else:
             self.goal_position = self.closest_diamond(board, board_bot)
-        
-        print(f"POSISI BOT: {board_bot.position}") # del
-        print(f"TARGET: {self.goal_position}") # del
+
+        print(f"POSISI BOT: {board_bot.position}")  # del
+        print(f"TARGET: {self.goal_position}")  # del
 
         # Hitung delta x, delta y
         if self.goal_position:
-            delta_x, delta_y = get_direction(
+            delta_x, delta_y = self.get_direction_zigzag(
                 current_position.x,
                 current_position.y,
                 self.goal_position.x,
@@ -273,9 +338,9 @@ class NanangBoneng(BaseLogic):
                 if delta_y == delta_x:
                     if delta_x == 0:
                         delta_y = 1
-                    else :
-                        delta_y = delta_x*-1
-            
+                    else:
+                        delta_y = delta_x * -1
+
         # Sequence gerakan menghindari teleport
         teleporter_position = []
         print(f"BOT Sendiri: {board_bot}")
@@ -290,7 +355,9 @@ class NanangBoneng(BaseLogic):
             print(Fore.RED + Style.BRIGHT + "SB.X TELEPORTER" + Style.RESET_ALL)
             # ukur jarak y dari current_position ke goal_position
             y_distance_to_goal = self.goal_position.y - current_position.y
-            if y_distance_to_goal > 0  or current_position.y == 0: # validasi agar tidak menabrak batas atas matrix
+            if (
+                y_distance_to_goal > 0 or current_position.y == 0
+            ):  # validasi agar tidak menabrak batas atas matrix
                 delta_x = 0
                 delta_y = 1
             else:
@@ -300,18 +367,18 @@ class NanangBoneng(BaseLogic):
         if (current_position.x, current_position.y + delta_y) in teleporter_position:
             print(Fore.RED + Style.BRIGHT + "SB.Y TELEPORTER" + Style.RESET_ALL)
             # ukur jarak x dari current_position ke goal_position
-            if delta_y == 1: # gerakan sedang turun
+            if delta_y == 1:  # gerakan sedang turun
                 if current_position.x == 0:
                     self.sequenceMove.append((1, 0))
                     self.sequenceMove.append((0, 1))
                     self.sequenceMove.append((0, 1))
                     self.sequenceMove.append((-1, 0))
-                else: 
+                else:
                     self.sequenceMove.append((-1, 0))
                     self.sequenceMove.append((0, 1))
                     self.sequenceMove.append((0, 1))
                     self.sequenceMove.append((1, 0))
-            else: # gerakan sedang naik
+            else:  # gerakan sedang naik
                 if current_position.x == 0:
                     self.sequenceMove.append((1, 0))
                     self.sequenceMove.append((0, -1))
@@ -333,5 +400,5 @@ class NanangBoneng(BaseLogic):
         if self.sequenceMove:
             delta_x, delta_y = self.sequenceMove.pop(0)
         self.timer_to_base += 1
-        print(f'timer: {self.timer_to_base}')
+        print(f"timer: {self.timer_to_base}")
         return delta_x, delta_y

@@ -12,7 +12,7 @@ class TaskiLogic2(BaseLogic):
     kalo ketemu diamond, bakal ngikutin diamond tersebut
     kalo diamondnya ilang, bakal cari diamond lagi
     kalo diamondnya udah 4, bakal balik ke base
-    defense: ga ada
+    defense: ga ada 
     attack: ga ada
     !! udah ada tambahan fungsi untuk ngecek teleporter
     """

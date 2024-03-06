@@ -1,7 +1,7 @@
 import argparse
 from time import sleep
 
-from colorama import Back, Fore, Style, init
+from colorama import Fore, Style, init
 from game.api import Api
 from game.board_handler import BoardHandler
 from game.bot_handler import BotHandler
@@ -18,18 +18,24 @@ from game.logic.nopal7 import NopalLogic7
 from game.logic.nopal8 import NopalLogic8
 from game.logic.nopal9 import NopalLogic9
 from game.logic.draftTele import TeleLogic
-from game.logic.final import NanangBoneng
+from game.logic.final import Final
+from game.logic.taski2 import TaskiLogic2
+from game.logic.taski3 import TaskiLogic3
+from game.logic.taski4 import BotTaski4
+from game.logic.draftTele import TeleLogic
+from game.logic.final_asli import FinalAsli
 
 init()
 BASE_URL = "http://localhost:3000/api"
 DEFAULT_BOARD_ID = 1
 CONTROLLERS = {
     "Random": RandomLogic,
+    "Taski": BotTaski,
     "Nopal": NopalLogic,
     "Nopal2": NopalLogic2,
     "Nopal3": NopalLogic3,
     "Nopal4": NopalLogic4,
-    "Nopal5": NopalLogic5, 
+    "Nopal5": NopalLogic5,
     "Nopal7": NopalLogic7,
     "Nopal8": NopalLogic8,
     "Nopal9": NopalLogic9,
