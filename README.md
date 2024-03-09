@@ -92,7 +92,7 @@ Untuk Windows
 11. Run bot di dalam direktori src dengan:
     - hanya 1 bot:
     ```
-    python main.py --logic NB --email=nanang135_email@example.com --name=nanangbon --password=nanang135_password --team etimo
+    python main.py --logic NanangBoneng --email=nanang_boneng_2@example.com --name=nanang --password=nanang_final_password --team etimo    
     ```
     - lebih dari 1 bot bersamaan (windows):
     ```
