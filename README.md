@@ -19,7 +19,7 @@ Dalam rangka memenangkan pertandingan, dibuatlah pendekatan algoritma greedy dar
 
 
 ## Screenshots <a href="screenshots"></a>
-![Example screenshot](.diamonds.gif)
+![Example screenshot](diamonds.gif)
 
 ## Dependencies <a href="dependencies"></a>
 - Python 3.x
