@@ -8,39 +8,17 @@ from game.bot_handler import BotHandler
 from game.logic.random import RandomLogic
 from game.util import *
 from game.logic.base import BaseLogic
-from game.logic.nopal import NopalLogic
-from game.logic.nopal2 import NopalLogic2
-from game.logic.taski import BotTaski
-from game.logic.nopal3 import NopalLogic3
-from game.logic.nopal4 import NopalLogic4
-from game.logic.nopal5 import NopalLogic5
-from game.logic.nopal6 import NopalLogic6
-from game.logic.nopal7 import NopalLogic7
-from game.logic.nopal8 import NopalLogic8
-from game.logic.nopal9 import NopalLogic9
-from game.logic.draftTele import TeleLogic
-from game.logic.final import NanangBoneng
-from game.logic.final_nopal import NanangFinal
+from game.logic.nanang_boneng import NanangBoneng
+from game.logic.draft_final_nopal import DraftNanang
 
 init()
 BASE_URL = "http://localhost:3000/api"
-DEFAULT_BOARD_ID = 1
+DEFAULT_BOARD_ID = 7
 CONTROLLERS = {
     "Random": RandomLogic,
-    "Nopal": NopalLogic,
-    "Nopal2": NopalLogic2,
-    "Nopal3": NopalLogic3,
-    "Nopal4": NopalLogic4,
-    "Nopal5": NopalLogic5,
-    "Nopal6": NopalLogic6,
-    "Nopal7": NopalLogic7,
-    "Nopal8": NopalLogic8,
-    "Nopal9": NopalLogic9,
-    "draftTele": TeleLogic,
-    "NB": NanangBoneng,
-    "Taski": BotTaski,
-    "Nanang" : NanangFinal
-} 
+    "NanangBoneng": NanangBoneng,
+    "Draft": DraftNanang,
+}
 
 ###############################################################################
 #

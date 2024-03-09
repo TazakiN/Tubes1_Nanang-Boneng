@@ -7,8 +7,8 @@ from game.models import GameObject, Board, Position
 from ..util import get_direction
 
 
-class NopalLogic9(BaseLogic):
-    # GREEDY BY DIAMOND, TACKLE/DEFENSE, TIMING, AVOID TELEPORT
+class FinalAsli(BaseLogic):
+    # GREEDY BY DIAMOND, TACKLE/DEFENSE, TIMING
     # akurat cari diamond terdekat
     # kalau inventori udah 4, ketemu diamond point 2 (4 + 2 != 5), maka skip diamond tersebut (cegah error)
     # timing base: detik 46 kalau masih jauh dari base, suruh pulang, kalau dekat dengan base, suruh pulang di detik 53
@@ -21,6 +21,7 @@ class NopalLogic9(BaseLogic):
         self.directions = [(1, 0), (0, 1), (-1, 0), (0, -1)]
         self.goal_position: Optional[Position] = None
         self.current_direction = 0
+        self.sequenceMove = []
 
     def distance(self, x2, x1, y2, y1):
         # hitung jarak antara dua titik
@@ -32,6 +33,13 @@ class NopalLogic9(BaseLogic):
 
     def get_teleporter(self, board: Board):
         return [t for t in board.game_objects if t.type == "TeleportGameObject"]
+
+    # Reset button
+    def diamond_button_position(self, board: Board):
+        for temp in board.game_objects:
+            if temp.type == "DiamondButtonGameObject":
+                return temp.position
+        return None
 
     def closest_diamond(self, board: Board, board_bot: GameObject):
         diamond_position = board.diamonds[0].position
@@ -55,11 +63,15 @@ class NopalLogic9(BaseLogic):
             )
 
             # Cegah error inventory penuh
+            # print(Fore.CYAN + "dmnd point: " + Style.RESET_ALL)
+            # print(board.diamonds[i].properties.points)
+            # print(Fore.CYAN + "     bot pegang diamond: " + Style.RESET_ALL)
+            # print(f'    {board_bot.properties.diamonds}' )
             if (
                 board.diamonds[i].properties.points == 2
                 and board_bot.properties.diamonds == 4
             ):
-                print("DIAMOND 2 TAPI UDAH 4")
+                print(Fore.RED + "DIAMOND 2 TAPI UDAH 4" + Style.RESET_ALL)
                 continue
 
             elif distance_to_diamond_i < distance_to_diamond:
@@ -69,112 +81,6 @@ class NopalLogic9(BaseLogic):
                 print(f"POSISI diaomon NEW: {diamond_position_new} ")
 
         return self.goal_position
-
-    def avoid_teleport(self, board_bot: GameObject, board: Board):
-        teleporter_position = []
-        print(f"BOT Sendiri: {board_bot}")
-        for teleport in self.get_teleporter(board):
-            teleporter_position.append((teleport.position.x, teleport.position.y))
-        print(f"TELEPORTER: {teleporter_position}")
-
-        our_bot = (board_bot.position.x, board_bot.position.y)
-        print(f"OUR BOT: {our_bot}")
-        if (board_bot.position.x + 1, board_bot.position.y) in teleporter_position:
-            print(Fore.RED + Style.BRIGHT + "KANAN ADA TELEPORTER" + Style.RESET_ALL)
-            if board_bot.position.x == 0:
-                if board_bot.position.y == 0:
-                    print(
-                        Fore.BLUE
-                        + "SUDAH DI POJOK KIRI ATAS, BERGERAK KE BAWAH"
-                        + Style.RESET_ALL
-                    )
-                    return 0, 1
-                elif board_bot.position.y == board.height - 1:
-                    print(
-                        Fore.BLUE
-                        + "SUDAH DI POJOK KIRI BAWAH, BERGERAK KE ATAS"
-                        + Style.RESET_ALL
-                    )
-                    return 0, -1
-                else:
-                    print(Fore.BLUE + "BERGERAK KE BAWAH" + Style.RESET_ALL)
-                    return 0, 1
-            else:
-                print(Fore.BLUE + "BERGERAK KE KIRI" + Style.RESET_ALL)
-                return -1, 0
-
-        if (board_bot.position.x - 1, board_bot.position.y) in teleporter_position:
-            print(Fore.RED + Style.BRIGHT + "KIRI ADA TELEPORTER" + Style.RESET_ALL)
-            if board_bot.position.x == board.width - 1:
-                if board_bot.position.y == 0:
-                    print(
-                        Fore.BLUE
-                        + "SUDAH DI POJOK KANAN ATAS, BERGERAK KE BAWAH"
-                        + Style.RESET_ALL
-                    )
-                    return 0, 1
-                elif board_bot.position.y == board.height - 1:
-                    print(
-                        Fore.BLUE
-                        + "SUDAH DI POJOK KANAN BAWAH, BERGERAK KE ATAS"
-                        + Style.RESET_ALL
-                    )
-                    return 0, -1
-                else:
-                    print(Fore.BLUE + "BERGERAK KE BAWAH" + Style.RESET_ALL)
-                    return 0, 1
-            else:
-                print(Fore.BLUE + "BERGERAK KE KANAN" + Style.RESET_ALL)
-                return 1, 0
-
-        if (board_bot.position.x, board_bot.position.y + 1) in teleporter_position:
-            print(Fore.RED + Style.BRIGHT + "BAWAH ADA TELEPORTER" + Style.RESET_ALL)
-            if board_bot.position.y == 0:
-                if board_bot.position.x == 0:
-                    print(
-                        Fore.BLUE
-                        + "SUDAH DI POJOK KIRI ATAS, BERGERAK KE KANAN"
-                        + Style.RESET_ALL
-                    )
-                    return 1, 0
-                elif board_bot.position.x == board.width - 1:
-                    print(
-                        Fore.BLUE
-                        + "SUDAH DI POJOK KANAN ATAS, BERGERAK KE KIRI"
-                        + Style.RESET_ALL
-                    )
-                    return -1, 0
-                else:
-                    print(Fore.BLUE + "BERGERAK KE KANAN" + Style.RESET_ALL)
-                    return 1, 0
-            else:
-                print(Fore.BLUE + "BERGERAK KE ATAS" + Style.RESET_ALL)
-                return 0, -1
-
-        if (board_bot.position.x, board_bot.position.y - 1) in teleporter_position:
-            print(Fore.RED + Style.BRIGHT + "ATAS ADA TELEPORTER" + Style.RESET_ALL)
-            if board_bot.position.y == board.height - 1:
-                if board_bot.position.x == 0:
-                    print(
-                        Fore.BLUE
-                        + "SUDAH DI POJOK KIRI BAWAH, BERGERAK KE KANAN"
-                        + Style.RESET_ALL
-                    )
-                    return 1, 0
-                elif board_bot.position.x == board.width - 1:
-                    print(
-                        Fore.BLUE
-                        + "SUDAH DI POJOK KANAN BAWAH, BERGERAK KE KIRI"
-                        + Style.RESET_ALL
-                    )
-                    return -1, 0
-                else:
-                    print(Fore.BLUE + "BERGERAK KE KANAN" + Style.RESET_ALL)
-                    return 1, 0
-            else:
-                print(Fore.BLUE + "BERGERAK KE BAWAH" + Style.RESET_ALL)
-                return 0, 1
-        return None
 
     def defense_from_enemy(self, board: Board, board_bot: GameObject):
         bot_enemy_position = []
@@ -187,6 +93,7 @@ class NopalLogic9(BaseLogic):
 
         our_bot = (board_bot.position.x, board_bot.position.y)
         print(f"OUR BOT: {our_bot}")
+        print((board_bot.position.x + 1, board_bot.position.y))
         if (board_bot.position.x + 1, board_bot.position.y) in bot_enemy_position:
             # if board.height
             print(Fore.RED + Style.BRIGHT + "KANAN ADA MUSUH" + Style.RESET_ALL)
@@ -327,20 +234,23 @@ class NopalLogic9(BaseLogic):
         return (delta_x, delta_y)
 
     def next_move(self, board_bot: GameObject, board: Board):
-        # if self.avoid_teleport(board_bot, board):
-        #     self.timer_to_base += 1
-        #     return self.avoid_teleport(board_bot, board)
-
         # if self.tackle_enemy(board_bot, board):
         #     self.timer_to_base += 1
         #     return self.tackle_enemy(board_bot, board)
 
-        # if self.defense_from_enemy(board, board_bot):
-        #     self.timer_to_base += 1
-        #     return self.defense_from_enemy(board, board_bot)
-
         props = board_bot.properties
         base = board_bot.properties.base
+        current_position = board_bot.position
+
+        # Defense/menghindar dari musuh
+        if self.defense_from_enemy(board, board_bot):
+            self.timer_to_base += 1
+            return self.defense_from_enemy(board, board_bot)
+
+        # Sequence gerakan menghindari teleport
+        if self.sequenceMove:
+            self.timer_to_base += 1
+            return self.sequenceMove.pop(0)
 
         # Monitor jarak bot ke base
         distance_to_base = self.distance(
@@ -353,27 +263,39 @@ class NopalLogic9(BaseLogic):
             self.goal_position = base  # Base(y=10, x=3)
 
         # Base timing management
-        elif self.timer_to_base >= 46:
+        elif self.timer_to_base >= 45:
             print(Fore.RED + "waktu pulang" + Style.RESET_ALL)
             if distance_to_base > 5:
                 print(Fore.CYAN + "TOO FAR, PULANG NOW" + Style.RESET_ALL)
                 self.goal_position = base
-            elif self.timer_to_base >= 53:
+            elif self.timer_to_base >= 52:
                 print(Fore.CYAN + "timer hit, PULANG" + Style.RESET_ALL)
                 self.goal_position = base
             else:
                 print("BELUM WAKTUNYA BALIK")
                 self.goal_position = self.closest_diamond(board, board_bot)
 
+        # Injak reset diamond button
+        elif (
+            self.distance(
+                current_position.x,
+                self.diamond_button_position(board).x,
+                current_position.y,
+                self.diamond_button_position(board).y,
+            )
+            <= 3
+        ):
+            diamond_button = self.diamond_button_position(board)
+            self.goal_position = diamond_button
+
         else:
             self.goal_position = self.closest_diamond(board, board_bot)
 
-        print(f"POSISI BOT: {board_bot.position}")
-        print(f"TARGET: {self.goal_position}")
+        print(f"POSISI BOT: {board_bot.position}")  # del
+        print(f"TARGET: {self.goal_position}")  # del
 
-        current_position = board_bot.position
+        # Hitung delta x, delta y
         if self.goal_position:
-            # We are aiming for a specific position, calculate delta
             delta_x, delta_y = get_direction(
                 current_position.x,
                 current_position.y,
@@ -391,6 +313,7 @@ class NopalLogic9(BaseLogic):
                     else:
                         delta_y = delta_x * -1
 
+        # Sequence gerakan menghindari teleport
         teleporter_position = []
         print(f"BOT Sendiri: {board_bot}")
         for teleport in self.get_teleporter(board):
@@ -404,7 +327,9 @@ class NopalLogic9(BaseLogic):
             print(Fore.RED + Style.BRIGHT + "SB.X TELEPORTER" + Style.RESET_ALL)
             # ukur jarak y dari current_position ke goal_position
             y_distance_to_goal = self.goal_position.y - current_position.y
-            if y_distance_to_goal > 0:
+            if (
+                y_distance_to_goal > 0 or current_position.y == 0
+            ):  # validasi agar tidak menabrak batas atas matrix
                 delta_x = 0
                 delta_y = 1
             else:
@@ -414,23 +339,28 @@ class NopalLogic9(BaseLogic):
         if (current_position.x, current_position.y + delta_y) in teleporter_position:
             print(Fore.RED + Style.BRIGHT + "SB.Y TELEPORTER" + Style.RESET_ALL)
             # ukur jarak x dari current_position ke goal_position
-            x_distance_to_goal = self.goal_position.x - current_position.x
-            if x_distance_to_goal > 0:
-                delta_x = 1
-                delta_y = 0
-            else:
-                delta_x = -1
-                delta_y = 0
-
-        # else:
-        #     # Roam around
-        #     delta = self.directions[self.current_direction]
-        #     delta_x = delta[0]
-        #     delta_y = delta[1]
-        #     if random.random() > 0.6:
-        #         self.current_direction = (self.current_direction + 1) % len(
-        #             self.directions
-        #         )
+            if delta_y == 1:  # gerakan sedang turun
+                if current_position.x == 0:
+                    self.sequenceMove.append((1, 0))
+                    self.sequenceMove.append((0, 1))
+                    self.sequenceMove.append((0, 1))
+                    self.sequenceMove.append((-1, 0))
+                else:
+                    self.sequenceMove.append((-1, 0))
+                    self.sequenceMove.append((0, 1))
+                    self.sequenceMove.append((0, 1))
+                    self.sequenceMove.append((1, 0))
+            else:  # gerakan sedang naik
+                if current_position.x == 0:
+                    self.sequenceMove.append((1, 0))
+                    self.sequenceMove.append((0, -1))
+                    self.sequenceMove.append((0, -1))
+                    self.sequenceMove.append((-1, 0))
+                else:
+                    self.sequenceMove.append((-1, 0))
+                    self.sequenceMove.append((0, -1))
+                    self.sequenceMove.append((0, -1))
+                    self.sequenceMove.append((1, 0))
 
         # print("POSISI diaomon: ")
         # print(board.diamonds[0].position.x)
@@ -438,6 +368,9 @@ class NopalLogic9(BaseLogic):
         # print("ALL DIAMONDS: ")
         # print(board.diamonds)
 
+        # Apakah terdapat gerakan di sequence
+        if self.sequenceMove:
+            delta_x, delta_y = self.sequenceMove.pop(0)
         self.timer_to_base += 1
         print(f"timer: {self.timer_to_base}")
         return delta_x, delta_y
